@@ -9,3 +9,7 @@ La fuente declarada es *Modelo de Estratificación y Atención Farmacéutica par
 - Situación terapéutica y complejidad posológica son mutuamente excluyentes.
 - Interacciones y condiciones especiales se implementan acumulativas por la petición recibida, pendiente de cotejo del original.
 - La prioridad excepcional requiere 15 caracteres, deja intactos score y prioridad calculada y registra fecha.
+
+## Separación respecto de la extracción
+
+El extractor propone datos estructurados, pero no contiene pesos, umbrales ni prioridades. Las reglas anteriores siguen ejecutándose exclusivamente en `src/clinical.js`. Las propuestas sugeridas y las confirmadas de especial cautela se excluyen del cálculo provisional hasta revisión humana.

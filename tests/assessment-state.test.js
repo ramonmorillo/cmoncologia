@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {initialAssessmentState,mergeExtraction,markManual,confirmVariable,effectiveAnswers,canFinalize} from '../src/assessment-state.js';
+import {extractClinicalText} from '../src/extractor.js';
+test('reanálisis conserva por defecto un valor manual',()=>{let s=mergeExtraction(initialAssessmentState(),extractClinicalText('Paciente de 67 años'));s=markManual(s,'age','70');s=mergeExtraction(s,extractClinicalText('Paciente de 68 años'),{preserveManual:true});assert.equal(s.answers.age,'70')});
+test('reanálisis puede reemplazar valores manuales con aviso previo en UI',()=>{let s=markManual(initialAssessmentState(),'age','70');s=mergeExtraction(s,extractClinicalText('Paciente de 68 años'),{preserveManual:false});assert.equal(s.answers.age,68)});
+test('una propuesta o variable crítica no revisada no puntúa ni permite finalizar',()=>{let s=mergeExtraction(initialAssessmentState(),extractClinicalText('ECOG 3. Posible disfagia.'));assert.equal(effectiveAnswers(s).ecog,undefined);assert.equal(canFinalize(s).ok,false);assert.ok(canFinalize(s).extractionPending.length>=2);s=confirmVariable(confirmVariable(s,'ecog'),'dysphagia');assert.equal(effectiveAnswers(s).ecog,3)});
+test('estado inicial válido no contiene caso, respuestas, extracción ni resultado',()=>{const s=initialAssessmentState('2026-09-08');assert.deepEqual(s.answers,{});assert.deepEqual(s.extraction,{});assert.equal(s.currentId,null);assert.equal(s.result,null);assert.equal(s.metadata.date,'2026-09-08')});

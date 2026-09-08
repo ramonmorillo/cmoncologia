@@ -1,0 +1,15 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {extractClinicalText} from '../src/extractor.js';
+const one=(text,id)=>extractClinicalText(text,new Date('2026-09-08T12:00:00Z')).results[id];
+test('edad explícita',()=>{const r=one('Paciente de 67 años','age');assert.equal(r.proposedValue,67);assert.equal(r.confidenceStatus,'confirmed')});
+test('negación psiquiátrica explícita y no consta prudente',()=>{assert.deepEqual([one('Sin antecedentes psiquiátricos','psychiatricHistory').proposedValue,one('Sin antecedentes psiquiátricos','psychiatricHistory').confidenceStatus],[false,'confirmed']);assert.notEqual(one('No consta antecedente psiquiátrico','psychiatricHistory').proposedValue,false)});
+test('ECOG 2 y 3',()=>{assert.equal(one('ECOG 2','ecog').proposedValue,2);assert.equal(one('PS ECOG: 3','ecog').proposedValue,3)});
+test('toxicidad reciente confirmada e histórica descartada',()=>{const recent=one('Presentó toxicidad grado 2 en el ciclo anterior','toxicity');assert.equal(recent.proposedValue,2);assert.equal(recent.confidenceStatus,'confirmed');assert.equal(one('Antecedente de toxicidad grado 2 hace tres años','toxicity').confidenceStatus,'not_found')});
+test('temporalidad de ingreso',()=>{assert.equal(one('Ingreso hospitalario hace 2 semanas','acuteCare').confidenceStatus,'confirmed');assert.equal(one('Ingreso hospitalario en 2021','acuteCare').confidenceStatus,'not_found')});
+test('pesos cuantitativos',()=>{assert.deepEqual(one('Peso actual 75 kg, peso hace 3 meses 80 kg','weightLoss').proposedValue,{currentWeight:75,previousWeight:80})});
+test('disfagia negada y posible',()=>{assert.deepEqual([one('Niega disfagia','dysphagia').proposedValue,one('Niega disfagia','dysphagia').confidenceStatus],[false,'confirmed']);assert.equal(one('Posible disfagia','dysphagia').confidenceStatus,'suggested')});
+test('tercera línea',()=>{assert.deepEqual(one('3ª línea de tratamiento','treatmentSituation').proposedValue,{line:3,situation:'thirdOrLater'})});
+test('adherencia conserva los dos componentes',()=>{assert.deepEqual(one('Dispensación 85%. Morisky no adherente','adherence').proposedValue,{dispensingPercent:85,moriskyIncorrect:true});assert.deepEqual(one('Dispensación 85%. Morisky adherente','adherence').proposedValue,{dispensingPercent:85,moriskyIncorrect:false})});
+test('interacción profesional Lexicomp D',()=>{assert.equal(one('Interacción farmacológica nivel D según Lexicomp','interactions').proposedValue,'D')});
+test('capecitabina no implica pauta compleja',()=>{assert.equal(one('Tratamiento con capecitabina','complexRegimen').confidenceStatus,'not_found')});
+test('texto irrelevante no genera falsos positivos',()=>{const e=extractClinicalText('Consulta programada. Paciente estable.');assert.ok(Object.values(e.results).every(x=>x.confidenceStatus==='not_found'))});

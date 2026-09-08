@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0 — 2026-09-08
+
+- Extracción clínica local, modular, conservadora y trazable con evidencia efímera.
+- Estados Extraído/Revisar/Manual/Pendiente, protección de cambios manuales y reanálisis avisado.
+- Bloqueo de finalización y de puntuación provisional para propuestas sin revisar de especial impacto.
+- Nueva estratificación con confirmación, limpieza integral del caso activo y conservación del historial.
+- Persistencia privada del caso activo sin texto clínico ni evidencia y nueva cobertura automatizada.
+
 ## 1.0.0 — 2026-09-08
 
 - Primera implementación del motor clínico, interfaz responsive, almacenamiento local, finalización, modificación excepcional, exportaciones, actuaciones, periodicidad, pruebas y documentación.
