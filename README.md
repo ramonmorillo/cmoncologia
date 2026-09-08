@@ -22,9 +22,27 @@ El servidor local debe abrirse en `http://localhost:4173/cmoncologia/`; para ell
 
 ## GitHub Pages
 
-1. Ejecute `npm run build`.
-2. Publique el contenido de `dist/` en la raíz de una rama `gh-pages`.
-3. En **Settings → Pages**, elija **Deploy from a branch**, rama `gh-pages`, carpeta `/ (root)`.
-4. Compruebe `https://ramonmorillo.github.io/cmoncologia/`.
+El workflow `.github/workflows/pages.yml` prueba y construye la aplicación, sube
+`dist/` como artefacto de Pages y solo después ejecuta el despliegue. En el
+repositorio, seleccione **Settings → Pages → Source: GitHub Actions**. Puede
+ejecutarlo manualmente desde **Actions → Deploy to GitHub Pages → Run workflow**
+o dejar que se ejecute al actualizar `main`.
 
-`<base href="/cmoncologia/">` fija la ruta de publicación. Consulte `AUDITORIA.md` antes de uso clínico.
+Si GitHub devuelve `403 Forbidden` al listar artefactos o crear el despliegue:
+
+1. Confirme que Pages usa **GitHub Actions**, no una rama `gh-pages`.
+2. En **Settings → Actions → General → Workflow permissions**, permita que las
+   acciones creen y aprueben despliegues de Pages según la política de la cuenta.
+3. Compruebe que el job `build` terminó y publicó `github-pages` antes del job
+   `deploy`; el workflow impide que este último se adelante mediante `needs`.
+4. Si el mensaje indica expresamente un error de un intermediario o de la API de
+   artefactos, vuelva a ejecutar únicamente los jobs fallidos: ese caso también
+   puede ser una incidencia transitoria de GitHub y no un error de la aplicación.
+
+`<base href="/cmoncologia/">` fija la ruta de publicación en
+`https://ramonmorillo.github.io/cmoncologia/`. Consulte `AUDITORIA.md` antes de
+uso clínico.
+
+## Importación clínica y nueva estratificación
+
+El bloque inicial permite pegar y analizar localmente texto clínico. Las propuestas conservan estado y trazabilidad, se pueden revisar y editar, y no se incorporan al cálculo cuando son dudosas o de especial impacto sin confirmación. El texto completo nunca se persiste ni exporta. **Nueva estratificación** confirma el borrado, limpia solo el caso activo y conserva el historial guardado. Consulte `EXTRACTION_RULES.md`.
