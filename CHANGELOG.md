@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.1 — 2026-09-08
+
+- Añadido workflow explícito de GitHub Pages con permisos mínimos, construcción,
+  publicación del artefacto y despliegue secuencial para evitar errores 403 por
+  configuración incompleta.
+- Documentado el diagnóstico de restricciones de Pages, permisos de Actions e
+  incidencias transitorias del servicio de artefactos.
+
 ## 1.1.0 — 2026-09-08
 
 - Extracción clínica local, modular, conservadora y trazable con evidencia efímera.
