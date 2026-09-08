@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {saveCase,getCase,duplicateCase,deleteCase,exportStructured,importStructured,exportCsv} from '../src/storage.js';
+class Memory{m=new Map;getItem(k){return this.m.get(k)??null}setItem(k,v){this.m.set(k,v)}}
+test('guardar, recuperar, duplicar y eliminar',()=>{const s=new Memory;const c=saveCase({status:'completed',metadata:{patientId:'P-1'},answers:{age:40},result:{score:0}},s);assert.equal(getCase(c.id,s).metadata.patientId,'P-1');const d=duplicateCase(c.id,s);assert.equal(d.status,'draft');deleteCase(c.id,s);assert.equal(getCase(c.id,s),null)});
+test('exportación/importación JSON y CSV',()=>{const c={status:'completed',metadata:{hospital:'H'},answers:{age:50},result:{score:0,positiveVariables:[]}};assert.deepEqual(importStructured(exportStructured(c)),c);assert.match(exportCsv(c),/hospital/)});
