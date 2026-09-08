@@ -30,3 +30,7 @@ Fuente común: *Modelo de Estratificación y Atención Farmacéutica para pacien
 | Toxicidad asociada | 4 — Variables relacionadas con el tratamiento | Grado CTCAE/CTC ≥2 en los últimos 3 ciclos. | 0–4 | Regla ejecutable: `toxicity` en `src/clinical.js` |
 | Adherencia | 4 — Variables relacionadas con el tratamiento | Dispensación ≤90% Y al menos una respuesta Morisky incorrecta. | 0–4 | Regla ejecutable: `adherence` en `src/clinical.js` |
 | Tratamiento en condiciones especiales | 4 — Variables relacionadas con el tratamiento | Las tres condiciones pueden coexistir y se contabilizan de forma acumulativa. | 0–9 | Regla ejecutable: `specialTreatment` en `src/clinical.js` |
+
+## Capa de extracción
+
+La correspondencia clínica y los pesos de esta tabla no se han modificado. `src/extractor.js` solo transforma menciones explícitas en campos que consume la fuente ejecutable `src/clinical.js`; no puntúa ni asigna prioridades. La cobertura, temporalidad y excepciones se detallan en `EXTRACTION_RULES.md`.

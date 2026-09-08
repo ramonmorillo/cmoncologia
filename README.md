@@ -28,3 +28,7 @@ El servidor local debe abrirse en `http://localhost:4173/cmoncologia/`; para ell
 4. Compruebe `https://ramonmorillo.github.io/cmoncologia/`.
 
 `<base href="/cmoncologia/">` fija la ruta de publicación. Consulte `AUDITORIA.md` antes de uso clínico.
+
+## Importación clínica y nueva estratificación
+
+El bloque inicial permite pegar y analizar localmente texto clínico. Las propuestas conservan estado y trazabilidad, se pueden revisar y editar, y no se incorporan al cálculo cuando son dudosas o de especial impacto sin confirmación. El texto completo nunca se persiste ni exporta. **Nueva estratificación** confirma el borrado, limpia solo el caso activo y conserva el historial guardado. Consulte `EXTRACTION_RULES.md`.

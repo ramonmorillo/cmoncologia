@@ -1,4 +1,5 @@
 const KEY='siaf-cmo-oncologia-cases-v1';
+const ACTIVE_KEY='siaf-cmo-oncologia-active-v1';
 const clone=v=>JSON.parse(JSON.stringify(v));
 export function listCases(storage=localStorage){try{return JSON.parse(storage.getItem(KEY)||'[]');}catch{return [];}}
 export function saveCase(record,storage=localStorage){const all=listCases(storage);const now=new Date().toISOString();const saved={...clone(record),id:record.id||crypto.randomUUID(),updatedAt:now,createdAt:record.createdAt||now};const i=all.findIndex(x=>x.id===saved.id);i<0?all.push(saved):all.splice(i,1,saved);storage.setItem(KEY,JSON.stringify(all));return saved;}
@@ -9,3 +10,6 @@ export function exportStructured(record){return JSON.stringify({schemaVersion:1,
 export function importStructured(text){const parsed=JSON.parse(text);if(parsed.schemaVersion!==1||parsed.application!=='SIAF-CMO Oncología'||!parsed.case?.answers)throw new Error('Archivo incompatible o incompleto.');return clone(parsed.case);}
 const csvCell=v=>`"${String(v??'').replaceAll('"','""')}"`;
 export function exportCsv(record){const r=record.result||{};const rows=[['campo','valor'],['hospital',record.metadata?.hospital],['farmaceutico',record.metadata?.pharmacist],['fecha',record.metadata?.date],['identificador_pseudonimizado',record.metadata?.patientId],['estado',record.status],['puntuacion',r.score],['prioridad_calculada',r.calculatedPriority],['prioridad_final',r.finalPriority],['prioridad_automatica',r.automaticReasons?.join('; ')]];for(const v of r.positiveVariables||[])rows.push([`variable_${v.id}`,`${v.label}: ${v.points}`]);return rows.map(row=>row.map(csvCell).join(',')).join('\n');}
+export function saveActiveCase(state,storage=localStorage){const safe=clone(state);delete safe.clinicalText;if(safe.extraction)for(const trace of Object.values(safe.extraction)){delete trace.evidence;}storage.setItem(ACTIVE_KEY,JSON.stringify(safe));return safe;}
+export function getActiveCase(storage=localStorage){try{return JSON.parse(storage.getItem(ACTIVE_KEY)||'null');}catch{return null;}}
+export function clearActiveCase(storage=localStorage){storage.removeItem(ACTIVE_KEY);}
