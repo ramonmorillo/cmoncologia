@@ -1,0 +1,14 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {calculate,priorityFromScore,weightLossPercent,VARIABLES,MAX_SCORE} from '../src/clinical.js';
+const pts=(id,a)=>VARIABLES.find(v=>v.id===id).score(a);
+test('umbrales 0, 15, 16, 27 y 28',()=>{assert.equal(priorityFromScore(0),3);assert.equal(priorityFromScore(15),3);assert.equal(priorityFromScore(16),2);assert.equal(priorityFromScore(27),2);assert.equal(priorityFromScore(28),1)});
+test('prioridades automáticas independientes del score',()=>{for(const a of [{age:12},{pregnancy:true},{socialSupport:true}]){const r=calculate(a);assert.equal(r.finalPriority,1);assert.equal(r.automaticPriority,1)}});
+test('pérdida de peso estrictamente superior al 5%',()=>{assert.equal(weightLossPercent(80,75),6.25);assert.equal(pts('weightLoss',{weightPrevious:80,weightCurrent:75,weightLossInvoluntary:true}),3);assert.equal(weightLossPercent(80,77),3.75);assert.equal(pts('weightLoss',{weightPrevious:80,weightCurrent:77,weightLossInvoluntary:true}),0)});
+test('ECOG 2 y 3',()=>{assert.equal(pts('ecog',{ecog:2}),2);assert.equal(pts('ecog',{ecog:3}),3)});
+test('EVA Distress 4, 5 y 7',()=>{assert.equal(pts('psychologicalDistress',{distressMethod:'eva',distressEva:4}),0);assert.equal(pts('psychologicalDistress',{distressMethod:'eva',distressEva:5}),2);assert.equal(pts('psychologicalDistress',{distressMethod:'eva',distressEva:7}),3)});
+test('Pfeiffer adapta umbral a alfabetización',()=>{assert.equal(pts('pfeiffer',{literate:true,pfeifferErrors:3}),2);assert.equal(pts('pfeiffer',{literate:false,pfeifferErrors:3}),0);assert.equal(pts('pfeiffer',{literate:false,pfeifferErrors:4}),2)});
+test('toxicidad grado >=2',()=>{assert.equal(pts('toxicity',{toxicityGrade:2}),4);assert.equal(pts('toxicity',{toxicityGrade:1}),0)});
+test('no adherencia exige ambos criterios',()=>{assert.equal(pts('adherence',{dispensingPercent:90,moriskyIncorrect:true}),4);assert.equal(pts('adherence',{dispensingPercent:90,moriskyIncorrect:false}),0)});
+test('override válido no altera score y el corto no se aplica',()=>{const base=calculate({});const valid=calculate({}, {priority:1,justification:'Justificación clínica suficiente',modifiedAt:'2026-01-01'});assert.equal(valid.score,base.score);assert.equal(valid.finalPriority,1);assert.equal(calculate({}, {priority:1,justification:'corta'}).finalPriority,3)});
+test('pendientes y subtotales',()=>{const r=calculate({ecog:3});assert.ok(r.pending.includes('age'));assert.equal(r.subtotals[2],3)});
+test('máximo declarado permanece 96 y la suma literal documenta discrepancia',()=>{assert.equal(MAX_SCORE,96);assert.equal(VARIABLES.reduce((n,v)=>n+v.max,0),97)});
