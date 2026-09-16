@@ -46,10 +46,96 @@ export const EXTRACTORS={
  specialTreatment:t=>{const trial=/ensayo\s+clínico/i.exec(t),special=/(?:uso|medicaci[oó]n)\s+especial/i.exec(t),recent=/(?:recientemente\s+comercializado|nuevo\s+medicamento)/i.exec(t);if(!trial&&!special&&!recent)return RESULT();return RESULT('suggested',{clinicalTrial:!!trial,specialUse:!!special,recentlyMarketed:!!recent},sentence(t,(trial||special||recent).index),'Condición especial mencionada; requiere confirmación.');}
 };
 
+// Internal comparison text only; evidence always comes from the original fragment.
+export function normalizeClinicalText(text){
+ const original=String(text??'');
+ return {original,comparable:original.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/²/g,'2').replace(/\s+/g,' ').trim()};
+}
+const fragments=text=>text.split(/\n|;|(?<=[.!?])\s+(?!\d)/).filter(fragment=>fragment.trim());
+const missing=/\b(?:no consta|no se documenta|sin datos|no hay (?:datos|informacion)|se desconoce)\b/;
+const negative=/\b(?:no (?:presenta|tiene|refiere|ha|hay)|sin|niega)\b/;
+const uncertain=/\b(?:posible|probable|sospecha|descartar)\b/;
+const historical=/\b(?:previo|previa|anteriormente|antecedente|historico|resuelt[oa])\b/;
+const current=/\b(?:actualmente|actual|ahora)\b/;
+function resolveCandidates(candidates){
+ if(!candidates.length)return RESULT();
+ const active=candidates.filter(c=>current.test(normalizeClinicalText(c.evidence).comparable));
+ const selected=active.length?active:candidates;
+ const last=selected.at(-1);
+ if(new Set(selected.map(c=>JSON.stringify(c.value))).size>1)return RESULT('suggested',last.value,selected.map(c=>c.evidence).join(' · '),'Datos discordantes; confirmar el valor vigente.');
+ return {...last,evidence:selected.map(c=>c.evidence).join(' · ')};
+}
+export const CLINICAL_RULES={
+ communicationBarriers:{aliases:['audicion','idioma'],positivePatterns:/barreras? (?:culturales?|de comunicacion)|dificultad(?:es)? (?:auditivas?|idiomaticas?|para (?:oir|comunicarse))|hipoacusia/,negativePatterns:negative,confidence:'confirmed'},
+ psychiatricHistory:{aliases:['depresion','ansiedad'],positivePatterns:/antecedentes? psiquiatric[oa]s?|depresion|trastorno (?:de )?ansiedad/,negativePatterns:negative,confidence:'confirmed'},
+ dysphagia:{aliases:['deglucion'],positivePatterns:/disfagia|dificultad(?:es)? (?:para (?:tragar|deglutir)|de deglucion)/,negativePatterns:negative,confidence:'confirmed'},
+ pregnancy:{aliases:['gestante'],positivePatterns:/embarazad[ao]|gestante|embarazo/,negativePatterns:negative,confidence:'confirmed'}
+};
+function configuredExtraction(text,rule){
+ const candidates=[];
+ for(const evidence of fragments(text)){
+  const t=normalizeClinicalText(evidence).comparable,m=rule.positivePatterns.exec(t);
+  if(!m||missing.test(t))continue;
+  const prefix=t.slice(0,m.index).split(/,|\bpero\b|\baunque\b/).at(-1);
+  if(historical.test(prefix)&&!current.test(t)&&rule===CLINICAL_RULES.pregnancy)continue;
+  const negated=rule.negativePatterns.test(prefix);
+  candidates.push(RESULT(uncertain.test(prefix)?'suggested':rule.confidence,!negated,evidence.trim(),negated?'Ausencia clínica explícita.':'Mención clínica explícita.'));
+ }
+ return resolveCandidates(candidates);
+}
+function enhancedECOG(text){
+ const candidates=[];
+ for(const evidence of fragments(text)){
+  const t=normalizeClinicalText(evidence).comparable;
+  if(missing.test(t))continue;
+  for(const m of t.matchAll(/(?:ecog|performance status)\s*(?:previo|actual)?\s*[:=]?\s*([0-4])\b/g)){
+   candidates.push(RESULT(historical.test(t)||uncertain.test(t)?'suggested':'confirmed',Number(m[1]),evidence.trim(),'ECOG explícito; se prioriza la mención actual.'));
+  }
+ }
+ return resolveCandidates(candidates);
+}
+function enhancedMedicationCount(text){
+ const explicit=extractPolypharmacy(text);
+ if(explicit.status!=='not_found')return explicit;
+ const section=/(?:medicaci[oó]n|tratamiento)\s+(?:domiciliari[oa]|habitual|concomitante)[ \t]*:[ \t]*([^\n]+)/i.exec(text);
+ if(!section)return RESULT();
+ const names=new Set();
+ for(const m of normalizeClinicalText(section[1]).comparable.matchAll(/\b([a-z][a-z-]+)\s+\d+(?:[.,]\d+)?\s*(?:mg|mcg|microgramos?|g|ui)\b/g))names.add(m[1]);
+ return names.size?RESULT('suggested',names.size,section[0],'Fármacos con dosis, sin duplicados. Confirmar que la lista está completa y excluye el proceso oncológico.'):RESULT();
+}
+function enhancedAdherence(text){
+ const existing=extractAdherence(text);
+ const evidence=fragments(text).filter(fragment=>{
+  const t=normalizeClinicalText(fragment).comparable;
+  return !missing.test(t)&&!negative.test(t)&&/(?:olvid[oó]|olvida|ha olvidado)\s+(?:(?:\d+|una?|dos|tres|cuatro|cinco|varias?)\s+)?(?:dosis|tomas)|omite\s+(?:algunas\s+)?tomas|duda si ha tomado|interrumpio el tratamiento/.test(t);
+ });
+ if(!evidence.length)return existing;
+ return RESULT('suggested',existing.value||{dispensingPercent:null,moriskyIncorrect:null},[existing.evidence,...evidence].filter(Boolean).join(' · '),'Problema de toma documentado. Revisar adherencia; no equivale a un resultado Morisky ni a un porcentaje de dispensación.');
+}
+function enhancedPfeiffer(text){
+ const existing=extractPfeiffer(text);
+ if(existing.status!=='not_found')return existing;
+ const r=configuredExtraction(text,{positivePatterns:/deterioro cognitivo/,negativePatterns:negative,confidence:'confirmed'});
+ return r.status==='not_found'?r:RESULT('suggested',{errors:null,literate:null},r.evidence,(r.value?'Presencia':'Ausencia')+' de deterioro cognitivo descrita, sin puntuación Pfeiffer. Completar escala sin inferir errores.');
+}
+function enhancedDoseAdjustment(text){
+ for(const evidence of fragments(text)){
+  const t=normalizeClinicalText(evidence).comparable;
+  if(missing.test(t))continue;
+  const m=/(?:fg(?:e| estimado)?|filtrado glomerular(?: estimado)?|egfr)\s*[:=]?\s*(\d+(?:[.,]\d+)?)\s*ml\s*\/\s*min(?:\s*\/\s*1[.,]73\s*m2)?/.exec(t);
+  if(m)return RESULT('suggested',null,evidence.trim(),'Filtrado glomerular explícito: '+m[1]+'. Valorar profesionalmente su repercusión sobre la dosis; no se aplica un umbral nuevo.');
+ }
+ return EXTRACTORS.doseAdjustment(text);
+}
+
 export function extractClinicalText(text,now=new Date()){
- const normalized=String(text||'').normalize('NFC');
+ const {original}=normalizeClinicalText(text);
  const extractedAt=now.toISOString();
- const results=Object.fromEntries(Object.entries(EXTRACTORS).map(([variableId,fn])=>{const r=fn(normalized);return [variableId,{variableId,proposedValue:r.value,confidenceStatus:r.status,evidence:r.evidence,reason:r.reason,source:'clinical_text',method:`deterministic:${fn.name||variableId}`,extractedAt}];}));
+ const enhanced={pfeiffer:enhancedPfeiffer,ecog:enhancedECOG,polypharmacy:enhancedMedicationCount,adherence:enhancedAdherence,doseAdjustment:enhancedDoseAdjustment};
+ const results=Object.fromEntries(Object.entries(EXTRACTORS).map(([variableId,fn])=>{
+  const r=CLINICAL_RULES[variableId]?configuredExtraction(original,CLINICAL_RULES[variableId]):(enhanced[variableId]||fn)(original);
+  return [variableId,{variableId,proposedValue:r.value,confidenceStatus:r.status,evidence:r.evidence,reason:r.reason,source:'clinical_text',method:`deterministic:${fn.name||variableId}`,extractedAt}];
+ }));
  const summary=Object.values(results).reduce((s,r)=>(s[r.confidenceStatus]++,s),{confirmed:0,suggested:0,not_found:0});
  return {results,summary,extractedAt};
 }
