@@ -1,89 +1,56 @@
-/* CMO Suite · capa visual común basada en CMO Migraña */
-:root {
-  --cmo-accent: #5dd1ad;
-  --cmo-accent-dark: #326b61;
-  --cmo-accent-soft: #e7f8f1;
-  --cmo-bg-a: #294f4c;
-  --cmo-bg-b: #4e345f;
-  --cmo-focus: #ffbf47;
-  --cmo-panel: #f8fbff;
-  --cmo-line: #d8e2f0;
-  --cmo-ink: #172033;
-  --cmo-muted: #5b6880;
-  --cmo-radius: 28px;
-  --cmo-shadow: 0 24px 70px #02081740;
-}
-html {
-  scroll-behavior: smooth;
-}
-body {
-  min-height: 100vh;
-  background: radial-gradient(
-    circle at 15% 8%,
-    var(--cmo-bg-a) 0,
-    #101b33 36%,
-    var(--cmo-bg-b) 100%
-  ) !important;
-  color: var(--cmo-ink);
-}
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(#ffffff08 1px, transparent 1px),
-    linear-gradient(90deg, #ffffff08 1px, transparent 1px);
-  background-size: 44px 44px;
-  pointer-events: none;
-}
-body > header,
-main,
-dialog,
-#toast {
-  position: relative;
-}
+/* CMO Design System 0.1.0 · tema «Estratos» de SIAF-CMO Oncología
+   Se carga después de styles.css. Solo presentación: no altera textos, puntuaciones
+   ni los colores semánticos de prioridad (--level en .p1/.p2/.p3).
+   Tokens: src/cmo-ds/ (copia fijada, ver CMO-DS-VERSION.json). */
+:root { --cmo-accent: #7a2f8f; } /* submarca Oncohematología: solo identidad, nunca resultados */
+
+body { background: var(--cmo-paper); color: var(--cmo-ink); }
+
 body > header {
-  width: min(1240px, calc(100% - 32px));
-  margin: 24px auto 0;
-  padding: 30px !important;
-  border: 1px solid #ffffff2b !important;
-  border-radius: var(--cmo-radius) !important;
-  box-shadow: var(--cmo-shadow) !important;
-  background: linear-gradient(135deg, #305b56, #38796d 55%, #583a68) !important;
+  width: min(1240px, 100% - 32px); margin: 0 auto; padding: clamp(24px, 4vw, 44px) 0 clamp(20px, 3vw, 28px);
+  background: none; color: var(--cmo-ink); border-bottom: 1px solid var(--cmo-rule);
 }
-body > header h1 {
-  font-size: clamp(2.6rem, 6vw, 5rem) !important;
-  line-height: 0.95;
-  letter-spacing: -0.055em;
-  color: #fff;
+body > header > div:first-child::before { /* franja de estratos C·M·O (decorativa) */
+  content: ""; display: block; width: 160px; height: 4px; margin-bottom: var(--cmo-space-4);
+  background: linear-gradient(90deg, var(--cmo-c) 0 50%, transparent 50% 52%, var(--cmo-m) 52% 80%, transparent 80% 82%, var(--cmo-o) 82%);
 }
-:where(.card, .score-card, .block, .variable, .result-card, dialog) {
-  border-radius: 22px !important;
-  border-color: var(--cmo-line) !important;
-  box-shadow: 0 16px 42px #0208171c !important;
-}
-button,
-.import {
-  border-radius: 999px !important;
-}
-input,
-select,
-textarea {
-  border-radius: 13px !important;
-}
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 4px solid var(--cmo-focus) !important;
-  outline-offset: 2px;
-}
-.progress i {
-  background: linear-gradient(90deg, var(--cmo-accent), #8e6da8) !important;
-}
-@media (prefers-reduced-motion: reduce) {
-  * {
-    scroll-behavior: auto !important;
-    transition: none !important;
-  }
+body > header h1 { margin: .2rem 0 .5rem; font: 600 clamp(2.1rem, 5vw, 3.2rem)/1.08 var(--cmo-font-serif); letter-spacing: -.015em; color: var(--cmo-ink); }
+body > header p { color: var(--cmo-ink-muted); }
+.eyebrow { color: var(--cmo-accent); }
+
+.privacy-banner { width: min(1240px, 100% - 32px); box-sizing: border-box; margin: var(--cmo-space-5) auto 0;
+  background: var(--cmo-brand-soft); border-left-color: var(--cmo-brand-strong); border-radius: 0 var(--cmo-radius-sm) var(--cmo-radius-sm) 0; }
+
+main { width: min(1240px, 100% - 32px); box-sizing: border-box; padding: var(--cmo-space-5) 0; } /* alinea con cabecera y aviso */
+.card, .score-card { border-color: var(--cmo-rule); border-radius: var(--cmo-radius-md); box-shadow: var(--cmo-shadow-1); }
+.import-card { background: var(--cmo-surface); border-top-color: var(--cmo-brand-strong); }
+.section-heading > span, .section-heading h2, .block-title h2 { font-family: var(--cmo-font-serif); font-weight: 600; }
+.block-title > span { background: var(--cmo-accent); border-radius: var(--cmo-radius-sm); }
+.variable h3 { overflow-wrap: break-word; hyphens: auto; }
+.points, .chips span { background: var(--cmo-brand-soft); color: var(--cmo-brand-strong); }
+.result-card, .priority { border-radius: var(--cmo-radius-md); }
+.score-card b, .score-card em { font-variant-numeric: tabular-nums; }
+
+button, .import { min-height: 44px; border-radius: var(--cmo-radius-sm); }
+button:not(.secondary):not(.danger):hover, .import:hover { background: var(--cmo-ink); }
+input, select, textarea { min-height: 44px; border-color: var(--cmo-control-border); border-radius: var(--cmo-radius-sm); color: var(--cmo-ink); }
+textarea { min-height: auto; }
+input:focus, select:focus, textarea:focus, button:focus { outline: 3px solid var(--cmo-focus); outline-offset: 2px; }
+
+dialog { border-radius: var(--cmo-radius-md); box-shadow: var(--cmo-shadow-2); color: var(--cmo-ink); }
+dialog::backdrop { background: #14203a8c; }
+
+.cmo-app-footer { width: min(1240px, 100% - 32px); margin: var(--cmo-space-6) auto var(--cmo-space-6);
+  padding-top: var(--cmo-space-5); border-top: 1px solid var(--cmo-rule); font-size: var(--cmo-text-sm); color: var(--cmo-ink-muted); }
+.cmo-app-footer p { margin: 0 0 var(--cmo-space-4); }
+.cmo-app-footer a { color: var(--cmo-brand-strong); }
+
+/* Corrige el desbordamiento horizontal previo en móvil (58 px a 375 px): la rejilla 1fr no encogía bajo el contenido */
+@media (max-width: 850px) { main { grid-template-columns: minmax(0, 1fr); } .workspace, .score-card { min-width: 0; } }
+.variable-head, .section-heading, .dialog-title { flex-wrap: wrap; }
+@media (max-width: 560px) { body > header { padding-top: 20px; } }
+@media print {
+  body { background: #fff; }
+  body > header > div:first-child::before { display: none; }
+  .card, .score-card { box-shadow: none; }
 }

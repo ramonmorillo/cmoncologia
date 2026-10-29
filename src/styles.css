@@ -1,12 +1,13 @@
-@import url("./cmo-visual.css");
+@import url("./cmo-ds/cmo-tokens.css");
+@import url("./cmo-ds/cmo-components.css");
 
 :root {
-  font-family: Inter, system-ui, sans-serif;
-  color: #18332f;
-  background: #f3f7f6;
+  font-family: var(--cmo-font-sans);
+  color: var(--cmo-ink);
+  background: var(--cmo-paper);
   line-height: 1.5;
-  --primary: #087f6b;
-  --line: #d6e4e1;
+  --primary: var(--cmo-brand-strong);
+  --line: var(--cmo-rule);
 }
 * {
   box-sizing: border-box;
@@ -40,7 +41,7 @@ header p {
   max-width: 1240px;
   margin: 1.5rem auto 0;
   padding: 1rem;
-  background: #e2f3ef;
+  background: var(--cmo-brand-soft);
   border-left: 4px solid var(--primary);
 }
 main {
@@ -98,11 +99,11 @@ main {
   margin: 0;
 }
 .variable p {
-  color: #526a66;
+  color: var(--cmo-ink-muted);
 }
 .points {
   white-space: nowrap;
-  background: #e8f5f2;
+  background: var(--cmo-brand-soft);
   padding: 0.3rem 0.65rem;
   border-radius: 99px;
   font-weight: 700;
@@ -130,7 +131,7 @@ input,
 select,
 textarea {
   font: inherit;
-  border: 1px solid #9eb7b2;
+  border: 1px solid var(--cmo-control-border);
   border-radius: 8px;
   padding: 0.65rem;
   background: white;
@@ -139,7 +140,7 @@ input:focus,
 select:focus,
 textarea:focus,
 button:focus {
-  outline: 3px solid #62c8b6;
+  outline: 3px solid var(--cmo-focus);
   outline-offset: 2px;
 }
 .rule,
@@ -154,7 +155,7 @@ button:focus {
 }
 .progress {
   height: 9px;
-  background: #dce9e6;
+  background: var(--cmo-surface-sunk);
   border-radius: 9px;
   overflow: hidden;
 }
@@ -205,8 +206,8 @@ button,
   cursor: pointer;
 }
 .secondary {
-  background: #e2eeec;
-  color: #17483f;
+  background: var(--cmo-brand-soft);
+  color: var(--cmo-brand-strong);
 }
 .danger {
   background: #ad3038;
@@ -245,7 +246,7 @@ button,
   flex-wrap: wrap;
 }
 .chips span {
-  background: #e8f5f2;
+  background: var(--cmo-brand-soft);
   padding: 0.3rem 0.6rem;
   border-radius: 99px;
 }
@@ -268,7 +269,7 @@ dialog {
   left: 50%;
   transform: translate(-50%, 30px);
   opacity: 0;
-  background: #163d36;
+  background: var(--cmo-ink);
   color: white;
   padding: 0.8rem;
   border-radius: 8px;
@@ -326,7 +327,7 @@ dialog {
 }
 .import-card {
   border-top: 5px solid var(--primary);
-  background: linear-gradient(145deg, #fff, #eef9f6);
+  background: linear-gradient(145deg, #fff, var(--cmo-brand-soft));
 }
 .import-card textarea {
   width: 100%;
@@ -336,10 +337,10 @@ dialog {
   margin: 0.15rem 0;
 }
 .eyebrow.dark {
-  color: #08705f;
+  color: var(--cmo-accent);
 }
 .privacy-note {
-  background: #e8f5f2;
+  background: var(--cmo-brand-soft);
   padding: 0.75rem;
   border-radius: 8px;
 }
@@ -362,7 +363,7 @@ dialog {
   padding: 0.25rem 0.55rem;
   border-radius: 99px;
   background: #edf1f0;
-  color: #526a66;
+  color: var(--cmo-ink-muted);
 }
 .origin.extraido {
   background: #ddf4eb;
@@ -385,7 +386,7 @@ dialog {
   margin-top: 0.9rem;
 }
 .evidence-text {
-  background: #f2f6f5;
+  background: var(--cmo-surface-sunk);
   border-left: 3px solid var(--primary);
   padding: 0.7rem;
 }
