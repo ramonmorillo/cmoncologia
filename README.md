@@ -6,7 +6,9 @@ Aplicación web estática, local y responsive de apoyo a la estratificación far
 
 - Motor clínico separado de la interfaz, prioridad por puntuación y tres condiciones de Prioridad 1 automática.
 - Borradores y casos finalizados en `localStorage`, recuperación, duplicado y borrado.
-- Exportación JSON/CSV, resumen imprimible y PDF mediante el diálogo del navegador.
+- Flujo de 7 etapas (inicio, historia clínica, revisión, estratificación, necesidades, intervenciones, informe) con resultado provisional cuando faltan datos.
+- Informe único: copiar para historia clínica, PDF real generado en local, impresión y texto; exportación JSON (`cmo-export/1`) y CSV, con importación validada.
+- Análisis asistido por reglas locales: cada propuesta se acepta, corrige o descarta antes de incorporarse.
 - Modificación clínica excepcional trazable y actuaciones acumulativas.
 - Sin backend, analítica, cookies, APIs externas ni transmisión de datos.
 
@@ -15,6 +17,7 @@ Aplicación web estática, local y responsive de apoyo a la estratificación far
 ```bash
 npm test
 npm run build
+npm run test:e2e   # Chromium (Playwright); AXE_PATH=<axe.min.js> añade la auditoría WCAG
 npm run dev
 ```
 

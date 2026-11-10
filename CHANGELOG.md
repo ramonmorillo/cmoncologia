@@ -1,9 +1,36 @@
 # Changelog
 
-## Sin publicar (rama `claude/zen-pasteur-u8tn7z`) — corrección de seguridad
+## 1.3.0 — sin publicar (rama `claude/zen-pasteur-u8tn7z`)
 
-- **XSS corregido**: la justificación de la modificación, los motivos automáticos, el identificador de la lista de casos y los valores de un JSON importado se insertaban como HTML sin escapar (`src/app.js`). Sin cambios en el modelo clínico, el motor ni las reglas del analizador. Prueba de regresión: `tests/xss-escape.test.js`.
-- Origen: auditoría funcional del ecosistema (hub, `docs/ECOSISTEMA_CMO_AUDIT.md`). La versión se fija en el commit de publicación.
+Adopción del flujo asistencial común del ecosistema CMO (patrón CMO Respiratorio) y correcciones de seguridad y de flujo. **Sin cambios en el modelo clínico**: `src/clinical.js`, `src/extractor.js` y `src/assessment-state.js` son idénticos byte a byte a la 1.2.0 (huellas SHA-256 en `tests/fixtures/clinical.sha256.json`). La fecha y el estado de publicación se fijan en el commit de publicación.
+
+### Flujo
+- Siete etapas con indicador de progreso: Inicio → Historia clínica → Revisión → Estratificación → Necesidades → Intervenciones → Informe. Se conservan el panel de puntuación en vivo, las variables, la modificación excepcional y los casos guardados.
+- Inicio: hospital, farmacéutico/a, tipo de paciente y fecha obligatorios; elección de método y aviso de privacidad.
+- **Análisis asistido con decisión previa** (antes, todo valor extraído se volcaba al formulario y los no críticos con estado «confirmado» puntuaban sin revisión): cada propuesta muestra su evidencia y criterio y se acepta, se acepta para corregir después o se descarta. Lo no decidido y lo descartado quedan pendientes; los valores manuales nunca se sobrescriben. El texto pegado no se guarda ni se exporta y se borra al incorporar las propuestas. Las reglas del extractor no se han tocado.
+- **Resultado provisional**: ahora se puede finalizar con campos pendientes (con confirmación explícita); el resultado queda rotulado como provisional, con la cota superior de puntuación y la prioridad máxima posible si las pendientes resultaran positivas. Un campo pendiente nunca se interpreta como «No».
+- Necesidades por bloque (confirmadas y potenciales) y estado de cada intervención del modelo (realizada, planificada, no procede) con plan de seguimiento y próxima valoración.
+- La modificación clínica excepcional sigue exigiendo 15 caracteres, conserva el resultado del modelo y, si rebaja una Prioridad 1 automática, se advierte en pantalla e informe (la regla no se ha endurecido: pendiente de decisión del autor).
+
+### Informe y exportación
+- Un único modelo de informe (`cmo-report/1`) del que salen el texto para historia clínica, la vista previa, la impresión y un **PDF real** generado en local.
+- JSON con esquema y versión (`cmo-export/1` + `cmo-onc-case/1`), CSV protegido frente a fórmulas e **importación validada que recalcula siempre el resultado** (antes se mostraba el resultado guardado en el fichero). Los ficheros JSON de la versión anterior siguen siendo importables.
+
+### Defectos corregidos
+- XSS por datos tecleados o importados insertados como HTML (justificación, motivos, identificador, valores de un JSON).
+- El borrador activo se perdía al recargar (el estado vacío lo sobrescribía antes de leerlo).
+- CSV sin neutralizar fórmulas (`src/storage.js`).
+- Una edad negativa o valores fuera de dominio puntuaban 0 sin aviso: ahora quedan pendientes.
+- Confirmaciones accesibles en lugar de `confirm()`/`alert()`; aviso al salir con datos sin guardar; borrado de casos con confirmación.
+
+### Pruebas
+- `npm test`: 58 (43 previas + regresión XSS + 14 del adaptador: paridad con el motor en 400 casos, fronteras 15/16 y 27/28, pendientes y cota superior, modificación, informe, importación hostil y formato anterior).
+- `npm run test:e2e`: 5 recorridos en Chromium con auditoría axe WCAG A/AA opcional (`AXE_PATH`).
+
+### Pendiente de decisión del autor
+- Rebajar una Prioridad 1 automática con 15 caracteres: ¿exigir justificación reforzada?
+- Incoherencias clínicas heredadas (`docs/ECOSISTEMA_CMO_AUDIT.md` del hub): máximos 97 frente a «/96»; HADS exactamente 10 puntúa 0; método «hads» sin valores no queda pendiente.
+- «Corregir» una propuesta se hace después en la historia clínica (no hay edición dentro de la tabla de propuestas).
 
 ## 1.2.0 — 2026-10-30 — Identidad CMO Design System
 

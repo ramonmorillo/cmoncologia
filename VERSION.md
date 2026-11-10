@@ -1,6 +1,10 @@
 # Versión
 
-1.2.0 — 2026-10-30
+1.3.0 — sin publicar
+
+Flujo asistencial común CMO de 7 etapas, informe único con PDF y estado provisional. Sin cambios en `clinical.js`.
+
+Anterior: 1.2.0 — 2026-10-30
 
 Identidad visual CMO Design System 0.2.0 (firma de autoría, foco y bordes accesibles, pie con enlaces legales). Sin cambios en `clinical.js`.
 
