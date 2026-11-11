@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.3.0 — sin publicar (rama `claude/zen-pasteur-u8tn7z`)
+## 1.3.0 — 2026-11-11
 
 Adopción del flujo asistencial común del ecosistema CMO (patrón CMO Respiratorio) y correcciones de seguridad y de flujo. **Sin cambios en el modelo clínico**: `src/clinical.js`, `src/extractor.js` y `src/assessment-state.js` son idénticos byte a byte a la 1.2.0 (huellas SHA-256 en `tests/fixtures/clinical.sha256.json`). La fecha y el estado de publicación se fijan en el commit de publicación.
 
