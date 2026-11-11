@@ -1,4 +1,4 @@
-/* CMO Design System 0.1.0 · tema «Estratos» de SIAF-CMO Oncología
+/* CMO Design System 0.3.0 · tema «Estratos» de SIAF-CMO Oncología
    Se carga después de styles.css. Solo presentación: no altera textos, puntuaciones
    ni los colores semánticos de prioridad (--level en .p1/.p2/.p3).
    Tokens: src/cmo-ds/ (copia fijada, ver CMO-DS-VERSION.json). */
@@ -49,8 +49,34 @@ dialog::backdrop { background: #14203a8c; }
 @media (max-width: 850px) { main { grid-template-columns: minmax(0, 1fr); } .workspace, .score-card { min-width: 0; } }
 .variable-head, .section-heading, .dialog-title { flex-wrap: wrap; }
 @media (max-width: 560px) { body > header { padding-top: 20px; } }
+/* Flujo común de 7 etapas (cmo-flow.css). Los selectores de elemento de styles.css (button, input) no tienen
+   capa y vencen a los componentes: aquí se restituye el aspecto del componente. */
+.cmo-stepper button { background: transparent; color: var(--cmo-ink-muted); border: 1px solid transparent; border-radius: var(--cmo-radius-sm); min-height: 44px; padding: var(--cmo-space-1) var(--cmo-space-3); font-weight: 600; }
+.cmo-stepper button[aria-current="step"] { background: var(--cmo-ink); color: #fff; }
+.cmo-stepper { margin-top: var(--cmo-space-4); }
+.cmo-stage { min-width: 0; }
+.choice-title { margin: var(--cmo-space-5) 0 var(--cmo-space-3); font: 600 var(--cmo-text-lg)/1.25 var(--cmo-font-serif); }
+.entry-options { margin-bottom: var(--cmo-space-5); }
+.entry-options .card { display: flex; flex-direction: column; align-items: flex-start; gap: var(--cmo-space-2); }
+.entry-options .card button { margin-top: auto; }
+.error-text { margin: var(--cmo-space-3) 0 0; min-height: 1.2em; color: var(--cmo-error); font-weight: 600; font-size: var(--cmo-text-sm); }
+.intervention-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--cmo-space-2); }
+.intervention-list li { display: grid; grid-template-columns: 1fr minmax(12rem, 18rem); gap: var(--cmo-space-3); align-items: center; padding-bottom: var(--cmo-space-2); border-bottom: 1px solid var(--cmo-rule); }
+.cmo-review select, .intervention-list select { min-width: 12rem; }
+.cmo-review td, .cmo-review th { overflow-wrap: anywhere; }
+.result-card .cmo-level { margin: 0 0 var(--cmo-space-3); }
+#reportPreview { margin-top: var(--cmo-space-4); }
+textarea#reportText { width: 100%; white-space: pre-wrap; }
+button:disabled { opacity: .55; cursor: not-allowed; }
+.cmo-modal button.cmo-btn--secondary { background: var(--cmo-surface); color: var(--cmo-brand-strong); border: 1px solid var(--cmo-brand-strong); }
+.cmo-modal button.cmo-btn--danger { background: var(--cmo-error); color: #fff; }
+.cmo-skip:focus { left: var(--cmo-space-3); top: var(--cmo-space-3); background: var(--cmo-surface); }
+[aria-invalid="true"] { border-color: var(--cmo-error); }
+@media (max-width: 760px) { .intervention-list li { grid-template-columns: 1fr; } }
+
 @media print {
   body { background: #fff; }
+  .header-actions, .actions, .cmo-button-group { display: none; }
   body > header > div:first-child::before { display: none; }
   .card, .score-card { box-shadow: none; }
 }
