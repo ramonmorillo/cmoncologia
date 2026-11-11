@@ -1,6 +1,6 @@
 # Versión
 
-1.3.0 — sin publicar
+1.3.0 — 11 de noviembre de 2026
 
 Flujo asistencial común CMO de 7 etapas, informe único con PDF y estado provisional. Sin cambios en `clinical.js`.
 
